@@ -2,13 +2,6 @@ const Chance = require('chance')
 const chance = new Chance()
 
 module.exports = (app) => {
-    let checkAuth = (actual) => {
-        const user = "test"
-        const pass = "pass"
-
-        let expected = "Basic " + btoa(user + ":" + pass)
-        return actual == expected
-    }
 
     app.get('/basicAuth/*', (req, res, next) => {
         const auth = { login: 'test', password: 'pass' }

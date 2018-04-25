@@ -6,6 +6,7 @@ const chance = new Chance()
 app.get('/', (req, res) => res.send('Hello World!'))
 
 require('./basicAuth')(app)
+require('./oauth')(app)
 
 app.get('/posts', (req, res) => {
     let posts = []
