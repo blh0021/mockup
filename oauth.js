@@ -1,6 +1,5 @@
 const Chance = require('chance')
 const chance = new Chance()
-const moment = require('moment')
 
 module.exports = (app) => {
     app.get('/oauth2/token', (req, res) => {
