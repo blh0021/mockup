@@ -2,7 +2,7 @@ const Chance = require('chance')
 const chance = new Chance()
 
 module.exports = (app) => {
-    app.get('/oauth2/token', (req, res) => {
+    app.all('/oauth2/token', (req, res) => {
         const auth = { login: 'test', password: 'pass' }
         const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
         const [login, password] = new Buffer(b64auth, 'base64').toString().split(':')
