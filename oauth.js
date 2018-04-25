@@ -15,8 +15,8 @@ module.exports = (app) => {
         }
         let token = (new Date().getTime()).toString()
         res.json({
-            "tokenType": "bearer",
-            "accessToken": Buffer.from(token).toString('base64')
+            "token_type": "bearer",
+            "access_token": Buffer.from(token).toString('base64')
         })
     })
 
