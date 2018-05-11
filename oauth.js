@@ -1,8 +1,23 @@
+const bodyParser = require('body-parser')
+
 const Chance = require('chance')
 const chance = new Chance()
 
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+var grantTypeCheck = (body, header) => {
+    const types = ['client_credentials', 'authorization_code', 'implicit', 'password_credentials']
+    return types.includes(body.grant_type) || types.includes(header.grant_type)
+}
+
 module.exports = (app) => {
-    app.all('/oauth2/token', (req, res) => {
+    app.all('/oauth2/token', urlencodedParser, (req, res) => {
+        if (!grantTypeCheck(req.body, req.headers)) {
+            res.status(401).json({
+                "error": "missing or invalid grant_type"
+            })
+            return
+        }
         const auth = { login: 'test', password: 'pass' }
         const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
         const [login, password] = new Buffer(b64auth, 'base64').toString().split(':')
