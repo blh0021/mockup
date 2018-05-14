@@ -1,5 +1,5 @@
 const bodyParser = require('body-parser')
-
+const helpers = require('./helpers')
 const Chance = require('chance')
 const chance = new Chance()
 
@@ -7,27 +7,44 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 var grantTypeCheck = (body, header) => {
     const types = ['client_credentials', 'authorization_code', 'implicit', 'password_credentials']
-    return types.includes(body.grant_type) || types.includes(header.grant_type)
+    if (types.includes(body.grant_type) || types.includes(header.grant_type)) {
+        return null
+    } else {
+        return "missing or invalid grant_type"
+    }
+}
+
+var basicAuth = (authHeader) => {
+    if (authHeader == undefined) {
+        return "Missing Basic Authorization Header"
+    }
+    const auth = { login: 'test', password: 'pass' }
+    const b64auth = (authHeader || '').split(' ')[1] || ''
+    const [login, password] = new Buffer(b64auth, 'base64').toString().split(':')
+    console.log("Login : " + login)
+    if (!login || !password || login !== auth.login || password !== auth.password) {
+        return "invalid username or password"
+    }
+
+    return null
 }
 
 module.exports = (app) => {
     app.all('/oauth2/token', urlencodedParser, (req, res) => {
-        if (!grantTypeCheck(req.body, req.headers)) {
+        console.log(req.body)
+        console.log(req.headers.authorization)
+        let authError = null
+        authError = grantTypeCheck(req.body, req.headers)
+        authError = helpers.basicAuth(req.headers.authorization)
+        if (authError != null) {
+            console.log("ERROR: " + authError)
+            res.set('WWW-Authenticate', 'Basic realm="401"')
             res.status(401).json({
-                "error": "missing or invalid grant_type"
+                "error": authError
             })
             return
         }
-        const auth = { login: 'test', password: 'pass' }
-        const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
-        const [login, password] = new Buffer(b64auth, 'base64').toString().split(':')
 
-        if (!login || !password || login !== auth.login || password !== auth.password) {
-            console.log("unauthorized login")
-            res.set('WWW-Authenticate', 'Basic realm="401"')
-            res.status(401).send('Authentication required.')
-            return
-        }
         let token = (new Date().getTime()).toString()
         res.json({
             "token_type": "bearer",

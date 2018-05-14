@@ -5,6 +5,12 @@ const chance = new Chance()
 
 app.get('/', (req, res) => res.send('Hello World!'))
 
+app.all('/*', function(req, res, next) {
+    console.log('DEBUG: ' + req.method + ' ' + req.originalUrl);
+    console.log(req.headers);
+    next();
+});
+
 require('./simple')(app)
 require('./basicAuth')(app)
 require('./oauth')(app)

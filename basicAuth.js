@@ -1,16 +1,15 @@
+const helpers = require('./helpers')
 const Chance = require('chance')
 const chance = new Chance()
 
 module.exports = (app) => {
 
     app.get('/basicAuth/*', (req, res, next) => {
-        const auth = { login: 'test', password: 'pass' }
-        const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
-        const [login, password] = new Buffer(b64auth, 'base64').toString().split(':')
+        let authError = helpers.basicAuth(req.headers.authorization)
 
-        if (!login || !password || login !== auth.login || password !== auth.password) {
+        if (authError != null) {
             res.set('WWW-Authenticate', 'Basic realm="401"')
-            res.status(401).send('Authentication required.')
+            res.status(401).send(authError)
             return
         }
         next();
